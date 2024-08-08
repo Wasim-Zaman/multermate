@@ -1,5 +1,6 @@
 const path = require("path");
 const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
 
 // Function to configure storage
 const configureStorage = (destination, filename) => {
@@ -11,7 +12,8 @@ const configureStorage = (destination, filename) => {
       const sanitizedFilename = file.originalname.replace(/\\/g, "/");
       const extension = path.extname(sanitizedFilename);
       const fieldName = filename || file.fieldname || "file";
-      const fileName = `${Date.now()}-${fieldName}${extension}`;
+      const uniqueName = uuidv4(); // Generate a unique name using uuid
+      const fileName = `${uniqueName}-${fieldName}${extension}`;
       cb(null, fileName);
     },
   });
