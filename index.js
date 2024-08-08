@@ -66,7 +66,7 @@ const configureMulter = ({
 module.exports = {
   uploadSingle: (options = {}) => {
     const multerInstance = configureMulter(options);
-    return multerInstance.single(options.fieldname || "file");
+    return multerInstance.single(options.filename || "file");
   },
   uploadMultiple: (options = {}) => {
     const multerInstance = configureMulter(options);
