@@ -2,6 +2,24 @@ const path = require("path");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 
+// Constants for allowed MIME types
+const ALLOWED_MIME_TYPES = {
+  images: ["image/jpeg", "image/png", "image/gif"],
+  videos: ["video/mp4", "video/mpeg", "video/ogg", "video/webm", "video/avi"],
+  pdfs: ["application/pdf"],
+  all: [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "video/mp4",
+    "video/mpeg",
+    "video/ogg",
+    "video/webm",
+    "video/avi",
+    "application/pdf",
+  ],
+};
+
 // Function to configure storage
 const configureStorage = (destination, filename) => {
   return multer.diskStorage({
@@ -37,23 +55,33 @@ const configureFileFilter = (allowedMimeTypes) => {
 const configureMulter = ({
   destination,
   filename,
-  allowedMimeTypes,
+  fileTypes = [],
+  customMimeTypes = [],
   fileSizeLimit,
 }) => {
   const storage = configureStorage(destination, filename);
-  const fileFilter = configureFileFilter(
-    allowedMimeTypes || [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "video/mp4",
-      "video/mpeg",
-      "video/ogg",
-      "video/webm",
-      "video/avi",
-      "application/pdf",
-    ]
-  );
+
+  // Combine allowed MIME types based on fileTypes array
+  let allowedMimeTypes = [];
+
+  if (customMimeTypes.length > 0) {
+    // Use custom MIME types if provided
+    allowedMimeTypes = customMimeTypes;
+  } else {
+    // Use default MIME types for specified fileTypes
+    fileTypes.forEach((type) => {
+      if (ALLOWED_MIME_TYPES[type]) {
+        allowedMimeTypes = allowedMimeTypes.concat(ALLOWED_MIME_TYPES[type]);
+      }
+    });
+
+    // If no specific file types are provided, use all allowed MIME types
+    if (allowedMimeTypes.length === 0) {
+      allowedMimeTypes = ALLOWED_MIME_TYPES.all;
+    }
+  }
+
+  const fileFilter = configureFileFilter(allowedMimeTypes);
 
   return multer({
     storage,
@@ -62,7 +90,7 @@ const configureMulter = ({
   });
 };
 
-// Export functions to configure multer
+// Export functions to configure multer and available file types
 module.exports = {
   uploadSingle: (options = {}) => {
     const multerInstance = configureMulter(options);
@@ -75,4 +103,5 @@ module.exports = {
       options.maxCount || 10
     );
   },
+  ALLOWED_FILE_TYPES: Object.keys(ALLOWED_MIME_TYPES),
 };
