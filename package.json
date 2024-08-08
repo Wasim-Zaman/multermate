@@ -1,16 +1,30 @@
 {
   "name": "multer-configurator",
   "version": "1.0.0",
+  "description": "A flexible and customizable npm package for configuring Multer",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "multer",
+    "file upload",
+    "middleware",
+    "node.js",
+    "configurable"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
     "multer": "1.4.5-lts.1",
     "uuid": "^10.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wasim-Zaman/multer-configurator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Wasim-Zaman/multer-configurator/issues"
+  },
+  "homepage": "https://github.com/Wasim-Zaman/multer-configurator#readme"
 }
