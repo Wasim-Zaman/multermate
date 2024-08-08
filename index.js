@@ -71,7 +71,7 @@ module.exports = {
   uploadMultiple: (options = {}) => {
     const multerInstance = configureMulter(options);
     return multerInstance.array(
-      options.fieldname || "files",
+      options.filename || "files",
       options.maxCount || 10
     );
   },
