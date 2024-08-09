@@ -21,7 +21,7 @@ const ALLOWED_MIME_TYPES = {
 };
 
 // Function to configure storage
-const configureStorage = (destination, filename) => {
+const configureStorage = (destination) => {
   return multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, destination || "uploads");
@@ -29,7 +29,7 @@ const configureStorage = (destination, filename) => {
     filename: (req, file, cb) => {
       const sanitizedFilename = file.originalname.replace(/\\/g, "/");
       const extension = path.extname(sanitizedFilename);
-      const fieldName = filename || file.fieldname || "file";
+      const fieldName = file.fieldname || "file";
       const uniqueName = uuidv4(); // Generate a unique name using uuid
       const fileName = `${uniqueName}-${fieldName}${extension}`;
       cb(null, fileName);
@@ -54,12 +54,11 @@ const configureFileFilter = (allowedMimeTypes) => {
 // Function to configure multer
 const configureMulter = ({
   destination,
-  filename,
   fileTypes = [],
   customMimeTypes = [],
   fileSizeLimit,
 }) => {
-  const storage = configureStorage(destination, filename);
+  const storage = configureStorage(destination);
 
   // Combine allowed MIME types based on fileTypes array
   let allowedMimeTypes = [];
@@ -90,6 +89,33 @@ const configureMulter = ({
   });
 };
 
+// Function to handle multiple fields
+const uploadFields = (fields) => {
+  const fieldConfigs = fields.map((field) => ({
+    name: field.name,
+    maxCount: field.maxCount || 10,
+  }));
+
+  let allowedFileTypes = [];
+
+  fields.forEach((field) => {
+    const types = field.fileTypes || [];
+    types.forEach((type) => {
+      if (ALLOWED_MIME_TYPES[type]) {
+        allowedFileTypes = allowedFileTypes.concat(ALLOWED_MIME_TYPES[type]);
+      }
+    });
+  });
+
+  const multerInstance = configureMulter({
+    fileTypes: allowedFileTypes,
+    customMimeTypes: [],
+    fileSizeLimit: fields[0]?.fileSizeLimit, // Assuming all fields share the same limit
+  });
+
+  return multerInstance.fields(fieldConfigs);
+};
+
 // Export functions to configure multer and available file types
 module.exports = {
   uploadSingle: (options = {}) => {
@@ -98,10 +124,7 @@ module.exports = {
   },
   uploadMultiple: (options = {}) => {
     const multerInstance = configureMulter(options);
-    return multerInstance.array(
-      options.filename || "files",
-      options.maxCount || 10
-    );
+    return multerInstance.fields(options.fields || []);
   },
   ALLOWED_FILE_TYPES: Object.keys(ALLOWED_MIME_TYPES),
 };

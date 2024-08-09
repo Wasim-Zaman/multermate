@@ -45,7 +45,7 @@ app.post(
   uploadSingle({
     destination: "uploads/images",
     filename: "image",
-    allowedMimeTypes: ["image/jpeg", "image/png"],
+    fileTypes: ["images"],
     fileSizeLimit: 1024 * 1024 * 10, // 10MB limit
   }),
   (req, res) => {
@@ -58,7 +58,7 @@ app.listen(3000, () => {
 });
 ```
 
-### Multiple Files Upload
+### Multiple Files Upload (Mixed File Types)
 
 ```javascript
 const express = require("express");
@@ -69,11 +69,10 @@ const app = express();
 app.post(
   "/upload/multiple",
   uploadMultiple({
-    destination: "uploads/files",
-    filename: "file",
-    allowedMimeTypes: ["image/jpeg", "image/png", "application/pdf"],
-    fileSizeLimit: 1024 * 1024 * 20, // 20MB limit
-    maxCount: 5, // Max 5 files
+    fields: [
+      { name: "media", maxCount: 1, fileTypes: ["images", "videos"] },
+      { name: "pdf", maxCount: 1, fileTypes: ["pdfs"] },
+    ],
   }),
   (req, res) => {
     res.send("Multiple files uploaded!");
@@ -85,7 +84,7 @@ app.listen(3000, () => {
 });
 ```
 
-### Custom MIME Types (e.g., Only PNGs)
+### Custom MIME Types (e.g., Only PNGs and PDFs)
 
 ```javascript
 const express = require("express");
@@ -93,52 +92,30 @@ const { uploadSingle, uploadMultiple } = require("multer-configurator");
 
 const app = express();
 
-// Single PNG image upload
+// Single PNG or PDF file upload
 app.post(
-  "/upload-png",
-  uploadSingle({ customMimeTypes: ["image/png"] }),
+  "/upload-custom",
+  uploadSingle({
+    destination: "uploads/custom",
+    customMimeTypes: ["image/png", "application/pdf"],
+    fileSizeLimit: 1024 * 1024 * 15, // 15MB limit
+  }),
   (req, res) => {
-    res.send("PNG image uploaded!");
+    res.send("PNG or PDF file uploaded!");
   }
 );
 
-// Multiple PNG image uploads
+// Multiple PNGs or PDFs upload
 app.post(
-  "/upload-pngs",
-  uploadMultiple({ customMimeTypes: ["image/png"] }),
+  "/upload-custom-multiple",
+  uploadMultiple({
+    fields: [
+      { name: "images", maxCount: 5, customMimeTypes: ["image/png"] },
+      { name: "pdfs", maxCount: 2, customMimeTypes: ["application/pdf"] },
+    ],
+  }),
   (req, res) => {
-    res.send("PNG images uploaded!");
-  }
-);
-
-app.listen(3000, () => {
-  console.log("Server started on http://localhost:3000");
-});
-```
-
-### Mixed File Types (e.g., Images and PDFs)
-
-```javascript
-const express = require("express");
-const { uploadSingle, uploadMultiple } = require("multer-configurator");
-
-const app = express();
-
-// Single image and PDF upload
-app.post(
-  "/upload-image-pdf",
-  uploadSingle({ fileTypes: ["images", "pdfs"] }),
-  (req, res) => {
-    res.send("Image and PDF uploaded!");
-  }
-);
-
-// Multiple images and PDFs upload
-app.post(
-  "/upload-images-pdfs",
-  uploadMultiple({ fileTypes: ["images", "pdfs"] }),
-  (req, res) => {
-    res.send("Images and PDFs uploaded!");
+    res.send("PNG images and PDF files uploaded!");
   }
 );
 
@@ -177,6 +154,6 @@ const { ALLOWED_FILE_TYPES } = require("multer-configurator");
 console.log(ALLOWED_FILE_TYPES); // ['images', 'videos', 'pdfs', 'all']
 ```
 
-### Conclusion
+## Conclusion
 
 multer-configurator provides a flexible and easy-to-use configuration for handling file uploads in Node.js applications. Whether you need to handle single or multiple file uploads, restrict uploads to certain file types, or specify custom MIME types, this package has you covered.
