@@ -1,6 +1,6 @@
 {
   "name": "multer-configurator",
-  "version": "2.1.2",
+  "version": "1.0.0",
   "description": "A flexible and customizable npm package for configuring Multer",
   "main": "index.js",
   "scripts": {
