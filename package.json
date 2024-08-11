@@ -1,6 +1,6 @@
 {
-  "name": "multer-configurator",
-  "version": "1.0.0",
+  "name": "multermate",
+  "version": "1.0.1",
   "description": "A flexible and customizable npm package for configuring Multer",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "node.js",
     "configurable"
   ],
-  "author": "Your Name",
+  "author": "Wasim Zaman",
   "license": "MIT",
   "dependencies": {
     "multer": "1.4.5-lts.1",
@@ -21,10 +21,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Wasim-Zaman/multer-configurator.git"
+    "url": "git+https://github.com/Wasim-Zaman/multermate.git"
   },
   "bugs": {
-    "url": "https://github.com/Wasim-Zaman/multer-configurator/issues"
+    "url": "https://github.com/Wasim-Zaman/multermate/issues"
   },
-  "homepage": "https://github.com/Wasim-Zaman/multer-configurator#readme"
+  "homepage": "https://github.com/Wasim-Zaman/multermate#readme"
 }

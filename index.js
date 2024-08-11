@@ -4,11 +4,12 @@ const { v4: uuidv4 } = require("uuid");
 
 // Constants for allowed MIME types
 const ALLOWED_MIME_TYPES = {
-  images: ["image/jpeg", "image/png", "image/gif"],
+  images: ["image/jpeg", "image/jpg", "image/png", "image/gif"],
   videos: ["video/mp4", "video/mpeg", "video/ogg", "video/webm", "video/avi"],
   pdfs: ["application/pdf"],
   all: [
     "image/jpeg",
+    "image/jpg",
     "image/png",
     "image/gif",
     "video/mp4",

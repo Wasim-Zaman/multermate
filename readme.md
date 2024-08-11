@@ -1,6 +1,6 @@
-# Multer Configurator
+# Multer Mate
 
-`multer-configurator` is a flexible and customizable npm package for configuring Multer, a Node.js middleware for handling `multipart/form-data` (file uploads). This package allows you to easily configure Multer for various use cases, including storing files in different directories and specifying allowed file types.
+`multermate` is a flexible and customizable npm package for configuring Multer, a Node.js middleware for handling `multipart/form-data` (file uploads). This package allows you to easily configure Multer for various use cases, including storing files in different directories and specifying allowed file types.
 
 ## Features
 
@@ -17,7 +17,7 @@
 Install the package using npm:
 
 ```bash
-npm install multer-configurator
+npm install multermate
 ```
 
 ## Usage
@@ -29,14 +29,14 @@ const {
   uploadSingle,
   uploadMultiple,
   ALLOWED_FILE_TYPES,
-} = require("multer-configurator");
+} = require("multermate");
 ```
 
 ### Single File Upload
 
 ```javascript
 const express = require("express");
-const { uploadSingle } = require("multer-configurator");
+const { uploadSingle } = require("multermate");
 
 const app = express();
 
@@ -62,7 +62,7 @@ app.listen(3000, () => {
 
 ```javascript
 const express = require("express");
-const { uploadMultiple } = require("multer-configurator");
+const { uploadMultiple } = require("multermate");
 
 const app = express();
 
@@ -88,7 +88,7 @@ app.listen(3000, () => {
 
 ```javascript
 const express = require("express");
-const { uploadSingle, uploadMultiple } = require("multer-configurator");
+const { uploadSingle, uploadMultiple } = require("multermate");
 
 const app = express();
 
@@ -128,7 +128,7 @@ app.listen(3000, () => {
 
 ```javascript
 const express = require("express");
-const { uploadSingle, uploadMultiple } = require("multer-configurator");
+const { uploadSingle, uploadMultiple } = require("multermate");
 
 const app = express();
 
@@ -150,10 +150,10 @@ app.listen(3000, () => {
 ### Exported Constants
 
 ```javascript
-const { ALLOWED_FILE_TYPES } = require("multer-configurator");
+const { ALLOWED_FILE_TYPES } = require("multermate");
 console.log(ALLOWED_FILE_TYPES); // ['images', 'videos', 'pdfs', 'all']
 ```
 
 ## Conclusion
 
-multer-configurator provides a flexible and easy-to-use configuration for handling file uploads in Node.js applications. Whether you need to handle single or multiple file uploads, restrict uploads to certain file types, or specify custom MIME types, this package has you covered.
+multermate provides a flexible and easy-to-use configuration for handling file uploads in Node.js applications. Whether you need to handle single or multiple file uploads, restrict uploads to certain file types, or specify custom MIME types, this package has you covered.
