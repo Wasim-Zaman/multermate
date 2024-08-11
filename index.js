@@ -37,7 +37,11 @@ const configureStorage = (destination) => {
       const extension = path.extname(sanitizedFilename);
       const fieldName = file.fieldname || "file"; // Use the field name as part of the filename.
       const uniqueName = uuidv4(); // Generate a unique name using uuid.
-      const fileName = `${uniqueName}-${fieldName}${extension}`;
+      let fileName = `${uniqueName}-${fieldName}${extension}`;
+
+      // Replace backslashes with forward slashes in the final filename
+      fileName = fileName.replace(/\\/g, "/");
+
       cb(null, fileName); // Set the final filename.
     },
   });
