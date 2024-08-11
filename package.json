@@ -1,6 +1,6 @@
 {
   "name": "multermate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A flexible and customizable npm package for configuring Multer",
   "main": "index.js",
   "scripts": {
