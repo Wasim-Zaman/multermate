@@ -1,6 +1,7 @@
 const path = require("path");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
+const fs = require("fs/promises");
 
 // Constants for allowed MIME types
 const ALLOWED_MIME_TYPES = {
@@ -153,6 +154,22 @@ const uploadFields = (fields) => {
   return multerInstance.fields(fieldConfigs);
 };
 
+/**
+ * Utility function to delete a file from the filesystem
+ *
+ * @param {string} filePath - The path to the file that needs to be deleted
+ * @returns {Promise<boolean>} - Returns true if deletion was successful, false otherwise
+ */
+const deleteFile = async (filePath) => {
+  try {
+    await fs.unlink(filePath);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting file: ${error.message}`);
+    return false;
+  }
+};
+
 // Export functions to configure multer and available file types
 module.exports = {
   /**
@@ -194,4 +211,7 @@ module.exports = {
    * @type {Array<string>}
    */
   ALLOWED_FILE_TYPES: Object.keys(ALLOWED_MIME_TYPES),
+
+  // Add the delete file utility
+  deleteFile,
 };

@@ -1,159 +1,255 @@
 # Multer Mate
 
-`multermate` is a flexible and customizable npm package for configuring Multer, a Node.js middleware for handling `multipart/form-data` (file uploads). This package allows you to easily configure Multer for various use cases, including storing files in different directories and specifying allowed file types.
+A robust and flexible file upload utility built on top of Multer, providing advanced file handling capabilities for Node.js applications.
 
 ## Features
 
-- Customizable storage destinations
-- Unique file naming using `uuid`
-- Support for various file types (images, videos, PDFs, etc.)
-- Configurable file size limits
-- Single and multiple file uploads
-- Specify custom MIME types within broader categories
-- Default behavior for allowing all MIME types if none specified
+- 📁 Flexible file storage configuration
+- 🔒 Built-in file type validation
+- 📦 Single and multiple file uploads
+- 🎯 Field-specific file type restrictions
+- 🗑️ File deletion utility
+- ⚡ Configurable file size limits
+- 🎨 Custom MIME type support
+- 🔄 Unique file naming with UUID
+- 🛡️ Path sanitization
+- 📝 Comprehensive error handling
 
 ## Installation
-
-Install the package using npm:
 
 ```bash
 npm install multermate
 ```
 
-## Usage
-
-### Import the package
+## Basic Usage
 
 ```javascript
-const {
-  uploadSingle,
-  uploadMultiple,
-  ALLOWED_FILE_TYPES,
-} = require("multermate");
+const { uploadSingle, uploadMultiple, deleteFile } = require("multermate");
 ```
+
+## Upload Configurations
 
 ### Single File Upload
 
 ```javascript
-const express = require("express");
-const { uploadSingle } = require("multermate");
+// Basic single file upload
+app.post("/upload", uploadSingle(), (req, res) => {
+  res.json({ file: req.file });
+});
 
-const app = express();
-
+// Advanced single file upload
 app.post(
-  "/upload/single",
+  "/upload/advanced",
   uploadSingle({
     destination: "uploads/images",
-    filename: "image",
+    filename: "profile",
     fileTypes: ["images"],
-    fileSizeLimit: 1024 * 1024 * 10, // 10MB limit
+    fileSizeLimit: 5 * 1024 * 1024, // 5MB
+    preservePath: false,
   }),
   (req, res) => {
-    res.send("Single file uploaded!");
+    res.json({ file: req.file });
   }
 );
-
-app.listen(3000, () => {
-  console.log("Server started on http://localhost:3000");
-});
 ```
 
-### Multiple Files Upload (Mixed File Types)
+### Multiple Files Upload
 
 ```javascript
-const express = require("express");
-const { uploadMultiple } = require("multermate");
-
-const app = express();
-
+// Multiple fields with different configurations
 app.post(
   "/upload/multiple",
   uploadMultiple({
     fields: [
-      { name: "media", maxCount: 1, fileTypes: ["images", "videos"] },
-      { name: "pdf", maxCount: 1, fileTypes: ["pdfs"] },
+      {
+        name: "avatar",
+        maxCount: 1,
+        fileTypes: ["images"],
+      },
+      {
+        name: "documents",
+        maxCount: 5,
+        fileTypes: ["pdfs"],
+      },
+      {
+        name: "media",
+        maxCount: 3,
+        fileTypes: ["images", "videos"],
+      },
     ],
+    destination: "uploads/mixed",
+    fileSizeLimit: 10 * 1024 * 1024, // 10MB per file
   }),
   (req, res) => {
-    res.send("Multiple files uploaded!");
+    res.json({ files: req.files });
   }
 );
-
-app.listen(3000, () => {
-  console.log("Server started on http://localhost:3000");
-});
 ```
 
-### Custom MIME Types (e.g., Only PNGs and PDFs)
+### Custom MIME Types
 
 ```javascript
-const express = require("express");
-const { uploadSingle, uploadMultiple } = require("multermate");
-
-const app = express();
-
-// Single PNG or PDF file upload
 app.post(
-  "/upload-custom",
+  "/upload/custom",
   uploadSingle({
     destination: "uploads/custom",
-    customMimeTypes: ["image/png", "application/pdf"],
-    fileSizeLimit: 1024 * 1024 * 15, // 15MB limit
-  }),
-  (req, res) => {
-    res.send("PNG or PDF file uploaded!");
-  }
-);
-
-// Multiple PNGs or PDFs upload
-app.post(
-  "/upload-custom-multiple",
-  uploadMultiple({
-    fields: [
-      { name: "images", maxCount: 5, customMimeTypes: ["image/png"] },
-      { name: "pdfs", maxCount: 2, customMimeTypes: ["application/pdf"] },
+    customMimeTypes: [
+      "application/vnd.ms-excel",
+      "application/json",
+      "text/csv",
     ],
-  }),
-  (req, res) => {
-    res.send("PNG images and PDF files uploaded!");
-  }
+    fileSizeLimit: 1024 * 1024, // 1MB
+  })
 );
+```
 
-app.listen(3000, () => {
-  console.log("Server started on http://localhost:3000");
+### File Deletion
+
+```javascript
+// Simple file deletion
+app.delete("/files/:filename", async (req, res) => {
+  const isDeleted = await deleteFile(`uploads/${req.params.filename}`);
+  res.json({ success: isDeleted });
+});
+
+// Advanced file deletion with error handling
+app.delete("/files/:type/:filename", async (req, res) => {
+  try {
+    const filePath = path.join("uploads", req.params.type, req.params.filename);
+    const isDeleted = await deleteFile(filePath);
+
+    if (isDeleted) {
+      res.json({
+        success: true,
+        message: "File deleted successfully",
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "File not found or unable to delete",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 });
 ```
 
-### Default Behavior (Allow All MIME Types)
+## API Reference
+
+### uploadSingle(options)
+
+Configures single file upload with the following options:
+
+| Option          | Type     | Default   | Description            |
+| --------------- | -------- | --------- | ---------------------- |
+| destination     | string   | 'uploads' | Upload directory path  |
+| filename        | string   | 'file'    | Form field name        |
+| fileTypes       | string[] | ['all']   | Allowed file types     |
+| customMimeTypes | string[] | []        | Custom MIME types      |
+| fileSizeLimit   | number   | 50MB      | Max file size in bytes |
+| preservePath    | boolean  | false     | Preserve original path |
+
+### uploadMultiple(options)
+
+Configures multiple file uploads with the following options:
+
+| Option          | Type     | Default   | Description          |
+| --------------- | -------- | --------- | -------------------- |
+| fields          | Field[]  | []        | Field configurations |
+| destination     | string   | 'uploads' | Upload directory     |
+| customMimeTypes | string[] | []        | Custom MIME types    |
+| fileSizeLimit   | number   | 50MB      | Max file size        |
+| preservePath    | boolean  | false     | Preserve paths       |
+
+#### Field Configuration
+
+| Option    | Type     | Default | Description           |
+| --------- | -------- | ------- | --------------------- |
+| name      | string   | -       | Field name (required) |
+| maxCount  | number   | 10      | Max files per field   |
+| fileTypes | string[] | ['all'] | Allowed types         |
+
+### deleteFile(filePath)
+
+Deletes a file from the filesystem:
+
+| Parameter | Type             | Description      |
+| --------- | ---------------- | ---------------- |
+| filePath  | string           | Path to file     |
+| Returns   | Promise<boolean> | Deletion success |
+
+### Supported File Types
 
 ```javascript
-const express = require("express");
-const { uploadSingle, uploadMultiple } = require("multermate");
+const ALLOWED_FILE_TYPES = {
+  images: ["jpeg", "jpg", "png", "gif"],
+  videos: ["mp4", "mpeg", "ogg", "webm", "avi"],
+  pdfs: ["pdf"],
+};
+```
 
-const app = express();
+## Error Handling
 
-// Single file upload (default behavior allows all MIME types)
+```javascript
 app.post("/upload", uploadSingle(), (req, res) => {
-  res.send("File uploaded!");
-});
+  try {
+    // File size validation
+    if (req.fileValidationError) {
+      return res.status(400).json({
+        error: req.fileValidationError,
+      });
+    }
 
-// Multiple files upload (default behavior allows all MIME types)
-app.post("/upload-multiple", uploadMultiple(), (req, res) => {
-  res.send("Files uploaded!");
-});
+    // File existence check
+    if (!req.file) {
+      return res.status(400).json({
+        error: "No file uploaded",
+      });
+    }
 
-app.listen(3000, () => {
-  console.log("Server started on http://localhost:3000");
+    // Success response
+    res.json({
+      success: true,
+      file: {
+        filename: req.file.filename,
+        path: req.file.path,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
 });
 ```
 
-### Exported Constants
+## Best Practices
 
-```javascript
-const { ALLOWED_FILE_TYPES } = require("multermate");
-console.log(ALLOWED_FILE_TYPES); // ['images', 'videos', 'pdfs', 'all']
-```
+1. Always implement proper error handling
+2. Set appropriate file size limits
+3. Validate file types on the server
+4. Use custom storage destinations for different file types
+5. Implement file cleanup mechanisms
+6. Consider implementing file type verification beyond MIME types
 
-## Conclusion
+## License
 
-multermate provides a flexible and easy-to-use configuration for handling file uploads in Node.js applications. Whether you need to handle single or multiple file uploads, restrict uploads to certain file types, or specify custom MIME types, this package has you covered.
+MIT
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
+
+## Author
+
+Your Name
+
+## Support
+
+For support, please open an issue in the GitHub repository.
