@@ -248,7 +248,7 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 
 ## Author
 
-Your Name
+Wasim Zaman
 
 ## Support
 
