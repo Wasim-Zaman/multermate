@@ -1,6 +1,6 @@
 {
   "name": "multermate",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A flexible and customizable npm package for configuring Multer",
   "main": "index.js",
   "scripts": {
@@ -26,5 +26,12 @@
   "bugs": {
     "url": "https://github.com/Wasim-Zaman/multermate/issues"
   },
-  "homepage": "https://github.com/Wasim-Zaman/multermate#readme"
+  "homepage": "https://github.com/Wasim-Zaman/multermate#readme",
+  "type": "commonjs",
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.js"
+    }
+  }
 }
