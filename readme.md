@@ -252,7 +252,7 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 
 ## Author
 
-Wasim Zaman
+Your Name
 
 ## Support
 
