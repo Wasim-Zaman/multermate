@@ -1,17 +1,7 @@
-const path =
-  typeof require !== "undefined"
-    ? require("path")
-    : (await import("path")).default;
-const multer =
-  typeof require !== "undefined"
-    ? require("multer")
-    : (await import("multer")).default;
-const { v4: uuidv4 } =
-  typeof require !== "undefined" ? require("uuid") : await import("uuid");
-const fs =
-  typeof require !== "undefined"
-    ? require("fs/promises")
-    : await import("fs/promises");
+const path = require("path");
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+const fs = require("fs/promises");
 
 // Constants for allowed MIME types
 const ALLOWED_MIME_TYPES = {
@@ -180,29 +170,48 @@ const deleteFile = async (filePath) => {
   }
 };
 
-const exportObject = {
+// Export functions to configure multer and available file types
+module.exports = {
+  /**
+   * Function to handle a single file upload.
+   *
+   * @param {object} options - Configuration options for the single file upload.
+   * @param {string} [options.destination] - Destination folder for the uploaded file.
+   * @param {string} [options.filename] - Custom filename template for the uploaded file.
+   * @param {Array<string>} [options.fileTypes] - Array of file types to allow (e.g., ['images']).
+   * @param {Array<string>} [options.customMimeTypes] - Array of custom MIME types to allow.
+   * @param {number} [options.fileSizeLimit] - Maximum file size allowed (in bytes). Default is 50MB.
+   * @param {boolean} [options.preservePath] - Preserve the full path of the uploaded file. Default is false.
+   * @returns {function} - Multer instance configured for single file upload.
+   */
   uploadSingle: (options = {}) => {
     const multerInstance = configureMulter(options);
     return multerInstance.single(options.filename || "file");
   },
 
+  /**
+   * Function to handle multiple file uploads across multiple fields.
+   *
+   * @param {object} options - Configuration options for multiple file uploads.
+   * @param {Array<object>} options.fields - Array of field configurations for multiple file uploads.
+   * @param {string} [options.destination] - Destination folder for the uploaded files.
+   * @param {Array<string>} [options.customMimeTypes] - Array of custom MIME types to allow.
+   * @param {number} [options.fileSizeLimit] - Maximum file size allowed (in bytes). Default is 50MB.
+   * @param {boolean} [options.preservePath] - Preserve the full path of the uploaded files. Default is false.
+   * @returns {function} - Multer instance configured for multiple file uploads.
+   */
   uploadMultiple: (options = {}) => {
     const multerInstance = configureMulter(options);
     return multerInstance.fields(options.fields || []);
   },
 
+  /**
+   * Export the allowed file types for reference.
+   *
+   * @type {Array<string>}
+   */
   ALLOWED_FILE_TYPES: Object.keys(ALLOWED_MIME_TYPES),
+
+  // Add the delete file utility
   deleteFile,
 };
-
-// Dual export support
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = exportObject;
-} else {
-  Object.assign(globalThis, {
-    uploadSingle: exportObject.uploadSingle,
-    uploadMultiple: exportObject.uploadMultiple,
-    ALLOWED_FILE_TYPES: exportObject.ALLOWED_FILE_TYPES,
-    deleteFile: exportObject.deleteFile,
-  });
-}

@@ -24,11 +24,7 @@ npm install multermate
 ## Basic Usage
 
 ```javascript
-// CommonJS
 const { uploadSingle, uploadMultiple, deleteFile } = require("multermate");
-
-// ES Modules
-import { uploadSingle, uploadMultiple, deleteFile } from "multermate";
 ```
 
 ## Upload Configurations
