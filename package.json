@@ -1,9 +1,31 @@
 {
   "name": "multermate",
-  "version": "1.0.5",
-  "description": "A flexible and customizable npm package for configuring Multer",
+  "version": "1.1.1",
+  "description": "A flexible and customizable file upload utility built on top of Multer with TypeScript support",
   "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "types": "./types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/",
+    "types/",
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
   "scripts": {
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:esm": "tsc --module ES2020 --outDir dist/esm && echo '{\"type\": \"module\"}' > dist/esm/package.json",
+    "build:types": "tsc --emitDeclarationOnly",
+    "clean": "node -e \"const fs=require('fs'); ['dist', 'types'].forEach(dir => { try { fs.rmSync(dir, {recursive: true, force: true}); } catch(e){} })\"",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -18,6 +40,13 @@
   "dependencies": {
     "multer": "1.4.5-lts.1",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.10.5",
+    "@types/uuid": "^9.0.7",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.3"
   },
   "repository": {
     "type": "git",

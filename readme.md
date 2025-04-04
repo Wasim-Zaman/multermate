@@ -1,6 +1,6 @@
 # Multer Mate
 
-A robust and flexible file upload utility built on top of Multer, providing advanced file handling capabilities for Node.js applications.
+A robust and flexible file upload utility built on top of Multer, providing advanced file handling capabilities for Node.js applications. Now with full TypeScript support!
 
 ## Features
 
@@ -14,6 +14,8 @@ A robust and flexible file upload utility built on top of Multer, providing adva
 - 🔄 Unique file naming with UUID
 - 🛡️ Path sanitization
 - 📝 Comprehensive error handling
+- 🔌 Works with CommonJS, ES Modules, and TypeScript
+- 📘 Full TypeScript definitions and type safety
 
 ## Installation
 
@@ -23,8 +25,35 @@ npm install multermate
 
 ## Basic Usage
 
+### CommonJS
+
 ```javascript
 const { uploadSingle, uploadMultiple, deleteFile } = require("multermate");
+```
+
+### ES Modules
+
+```javascript
+import { uploadSingle, uploadMultiple, deleteFile } from "multermate";
+```
+
+### TypeScript
+
+```typescript
+import {
+  uploadSingle,
+  uploadMultiple,
+  deleteFile,
+  UploadSingleOptions,
+  UploadMultipleOptions,
+} from "multermate";
+
+// With type definitions
+const options: UploadSingleOptions = {
+  destination: "uploads/images",
+  fileTypes: ["images"],
+  fileSizeLimit: 5 * 1024 * 1024,
+};
 ```
 
 ## Upload Configurations
@@ -99,7 +128,10 @@ app.post(
       "text/csv",
     ],
     fileSizeLimit: 1024 * 1024, // 1MB
-  })
+  }),
+  (req, res) => {
+    res.json({ file: req.file });
+  }
 );
 ```
 
@@ -167,11 +199,12 @@ Configures multiple file uploads with the following options:
 
 #### Field Configuration
 
-| Option    | Type     | Default | Description           |
-| --------- | -------- | ------- | --------------------- |
-| name      | string   | -       | Field name (required) |
-| maxCount  | number   | 10      | Max files per field   |
-| fileTypes | string[] | ['all'] | Allowed types         |
+| Option        | Type     | Default | Description           |
+| ------------- | -------- | ------- | --------------------- |
+| name          | string   | -       | Field name (required) |
+| maxCount      | number   | 10      | Max files per field   |
+| fileTypes     | string[] | ['all'] | Allowed types         |
+| fileSizeLimit | number   | 50MB    | Max file size         |
 
 ### deleteFile(filePath)
 
@@ -182,17 +215,31 @@ Deletes a file from the filesystem:
 | filePath  | string           | Path to file     |
 | Returns   | Promise<boolean> | Deletion success |
 
-### Supported File Types
+### Supported MIME Types
 
 ```javascript
-const ALLOWED_FILE_TYPES = {
-  images: ["jpeg", "jpg", "png", "gif"],
-  videos: ["mp4", "mpeg", "ogg", "webm", "avi"],
-  pdfs: ["pdf"],
+const ALLOWED_MIME_TYPES = {
+  images: ["image/jpeg", "image/jpg", "image/png", "image/gif"],
+  videos: ["video/mp4", "video/mpeg", "video/ogg", "video/webm", "video/avi"],
+  pdfs: ["application/pdf"],
+  all: [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "video/mp4",
+    "video/mpeg",
+    "video/ogg",
+    "video/webm",
+    "video/avi",
+    "application/pdf",
+  ],
 };
 ```
 
 ## Error Handling
+
+MulterMate adds a `fileValidationError` property to the request object when validation fails:
 
 ```javascript
 app.post("/upload", uploadSingle(), (req, res) => {
@@ -229,6 +276,37 @@ app.post("/upload", uploadSingle(), (req, res) => {
 });
 ```
 
+## TypeScript Support
+
+MulterMate includes complete TypeScript definitions for all functions and options:
+
+```typescript
+// Type definitions for all options
+import {
+  UploadSingleOptions,
+  UploadMultipleOptions,
+  FieldConfig,
+} from "multermate";
+
+// Using with Express and TypeScript
+import express from "express";
+import { uploadSingle } from "multermate";
+
+const app = express();
+
+app.post(
+  "/upload",
+  uploadSingle({
+    destination: "uploads/typescript",
+    fileTypes: ["images"],
+    fileSizeLimit: 5 * 1024 * 1024,
+  }),
+  (req, res) => {
+    res.json({ success: true, file: req.file });
+  }
+);
+```
+
 ## Best Practices
 
 1. Always implement proper error handling
@@ -237,6 +315,8 @@ app.post("/upload", uploadSingle(), (req, res) => {
 4. Use custom storage destinations for different file types
 5. Implement file cleanup mechanisms
 6. Consider implementing file type verification beyond MIME types
+7. Create upload directories if they don't exist (MulterMate does this automatically)
+8. Use TypeScript types for better development experience
 
 ## License
 
@@ -248,8 +328,8 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 
 ## Author
 
-Your Name
+Wasim Zaman
 
 ## Support
 
-For support, please open an issue in the GitHub repository.
+For support, please open an issue in the GitHub repository: https://github.com/Wasim-Zaman/multermate
