@@ -2,15 +2,30 @@
   "compilerOptions": {
     "target": "ES2018",
     "module": "CommonJS",
+    "lib": ["ES2018", "ES2019", "ES2020"],
     "declaration": true,
     "declarationDir": "./types",
     "outDir": "./dist/cjs",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "types",
+    "**/*.test.ts",
+    "multermate-test/**/*"
+  ]
 }
