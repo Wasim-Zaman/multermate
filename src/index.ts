@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import fs from 'fs/promises';
+import { mkdirSync } from 'fs';
 import multer from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -213,8 +214,6 @@ const configureStorage = (destination?: string) => {
       
       // Create directory synchronously - multer destination callback doesn't support async
       try {
-        // Import properly for both CommonJS and ESM
-        const { mkdirSync } = eval('require')('fs');
         mkdirSync(dir, { recursive: true });
         cb(null, dir);
       } catch (error: any) {
@@ -349,7 +348,6 @@ export function uploadSingle(options: UploadSingleOptions = {}): (req: Request, 
     return (req: Request, res: Response, next: NextFunction) => {
       // Make sure the destination directory exists
       try {
-        const { mkdirSync } = eval('require')('fs');
         mkdirSync(destination, { recursive: true });
       } catch (error) {
         // Directory might already exist, ignore error
@@ -437,7 +435,6 @@ export function uploadMultiple(options: UploadMultipleOptions): (req: Request, r
     return (req: Request, res: Response, next: NextFunction) => {
       // Make sure the destination directory exists
       try {
-        const { mkdirSync } = eval('require')('fs');
         mkdirSync(destination, { recursive: true });
       } catch (error) {
         // Directory might already exist, ignore error
