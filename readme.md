@@ -68,7 +68,7 @@ import {
 // With type definitions
 const options: UploadSingleOptions = {
   destination: "uploads/images",
-  fileTypes: ["images"],
+  fileKinds: ["image"],
   fileSizeLimit: 5 * 1024 * 1024,
 };
 ```
@@ -114,11 +114,11 @@ app.post("/upload", uploadSingle(), (req, res) => {
 app.post(
   "/upload/advanced",
   uploadSingle({
-    destination: "uploads/images",
-    // Files are physically saved here, but req.file.path stays clean for DB
-    absoluteDestination: "C:/data/my-app/uploads/images",
+    destination: "public/uploads/test",
+    // Physical location becomes: C:/Dev/Projects/public/uploads/test
+    absoluteDestination: "C:/Dev/Projects",
     filename: "profile",
-    fileTypes: ["images"],
+    fileKinds: ["image"],
     fileSizeLimit: 5 * 1024 * 1024, // 5MB
     preservePath: false,
   }),
@@ -190,6 +190,27 @@ app.post(
   }
 );
 ```
+
+### Easy File Kind Selection
+
+Use `fileKinds` when you want simple category names instead of a long MIME list:
+
+```javascript
+app.post(
+  "/upload/easy",
+  uploadSingle({
+    destination: "uploads/easy",
+    fileKinds: ["image"], // image | document | video | audio | mix | any
+  }),
+  (req, res) => {
+    res.json({ file: req.file });
+  }
+);
+```
+
+`mix` includes: images, videos, audio, documents, text, and archives.
+
+`any` disables filtering (accepts all file types).
 
 ### Custom MIME Types
 
@@ -302,12 +323,13 @@ Configures single file upload with the following options:
 | ------------------- | -------- | --------- | ------------------------------------------------------------------------------------------------ |
 | destination         | string   | 'uploads' | Upload directory path                                                                            |
 | filename            | string   | 'file'    | Form field name                                                                                  |
+| fileKinds           | string[] | []        | Easy categories like `image`, `document`, `video`, `mix`, `any`                                 |
 | fileTypes           | string[] | []        | Allowed file type categories (empty = all)                                                       |
 | customMimeTypes     | string[] | []        | Custom MIME types                                                                                |
 | fileSizeLimit       | number   | 50MB      | Max file size in bytes                                                                           |
 | preservePath        | boolean  | false     | Preserve original path                                                                           |
 
-`absoluteDestination` (optional): Physical absolute directory for file storage. When provided, MulterMate keeps `req.file.path` relative so it is safer to store in DB.
+`absoluteDestination` (optional): Base absolute directory for physical storage. The final storage path is `absoluteDestination + destination`. MulterMate keeps `req.file.path` relative so it is safer to store in DB.
 
 ### uploadMultiple(options)
 
@@ -332,13 +354,13 @@ app.post(
   "/upload/absolute",
   uploadSingle({
     destination: "uploads/images", // This is what goes to req.file.path
-    absoluteDestination: "D:/cdn-storage/project/images", // Physical storage directory
-    fileTypes: ["images"],
+    absoluteDestination: "D:/cdn-storage/project", // Base physical storage directory
+    fileKinds: ["image"],
   }),
   (req, res) => {
     // Example:
     // req.file.path => "uploads/images/<generated-file-name>.jpg"
-    // Physical file => "D:/cdn-storage/project/images/<generated-file-name>.jpg"
+    // Physical file => "D:/cdn-storage/project/uploads/images/<generated-file-name>.jpg"
     res.json({ file: req.file });
   }
 );
@@ -350,6 +372,7 @@ app.post(
 | ------------- | -------- | ------- | ---------------------------------------- |
 | name          | string   | -       | Field name (required)                    |
 | maxCount      | number   | 10      | Max files per field                      |
+| fileKinds     | string[] | []      | Easy categories like `image`, `document`, `video`, `mix`, `any` |
 | fileTypes     | string[] | []      | Allowed types (empty = accept all types) |
 | fileSizeLimit | number   | 50MB    | Max file size                            |
 
