@@ -27,6 +27,7 @@ export class MultermateError extends Error {
 // Define your types
 export interface UploadSingleOptions {
   destination?: string;
+  absoluteDestination?: string;
   filename?: string;
   fileTypes?: string[];
   customMimeTypes?: string[];
@@ -44,6 +45,7 @@ export interface FieldConfig {
 export interface UploadMultipleOptions {
   fields: FieldConfig[];
   destination?: string;
+  absoluteDestination?: string;
   customMimeTypes?: string[];
   fileSizeLimit?: number;
   preservePath?: boolean;
@@ -244,6 +246,49 @@ const configureStorage = (destination?: string) => {
   });
 };
 
+const normalizePathForDb = (value: string): string => value.replace(/\\/g, '/');
+
+const getPhysicalDestination = (destination?: string, absoluteDestination?: string): string => {
+  if (!absoluteDestination) {
+    return destination || 'uploads';
+  }
+
+  if (!path.isAbsolute(absoluteDestination)) {
+    throw new MultermateError(
+      `absoluteDestination must be an absolute path. Received: ${absoluteDestination}`,
+      'INVALID_ABSOLUTE_DESTINATION'
+    );
+  }
+
+  return absoluteDestination;
+};
+
+const sanitizeStoredPathsForDb = (
+  req: Request,
+  destination?: string,
+  absoluteDestination?: string
+) => {
+  if (!absoluteDestination) {
+    return;
+  }
+
+  const dbDestination = normalizePathForDb(destination || 'uploads');
+
+  if (req.file) {
+    req.file.destination = dbDestination;
+    req.file.path = normalizePathForDb(path.join(dbDestination, req.file.filename));
+  }
+
+  if (req.files && !Array.isArray(req.files)) {
+    Object.values(req.files).forEach((files) => {
+      files.forEach((file) => {
+        file.destination = dbDestination;
+        file.path = normalizePathForDb(path.join(dbDestination, file.filename));
+      });
+    });
+  }
+};
+
 /**
  * Function to configure file filter for Multer.
  *
@@ -284,6 +329,7 @@ const configureFileFilter = (allowedMimeTypes: string[]) => {
  */
 const configureMulter = ({
   destination,
+  absoluteDestination,
   filename,
   fileTypes = [],
   customMimeTypes = [],
@@ -291,6 +337,7 @@ const configureMulter = ({
   preservePath = false,
 }: {
   destination?: string;
+  absoluteDestination?: string;
   filename?: string;
   fileTypes?: string[];
   customMimeTypes?: string[];
@@ -298,7 +345,7 @@ const configureMulter = ({
   preservePath?: boolean;
 }) => {
   try {
-    const storage = configureStorage(destination);
+    const storage = configureStorage(getPhysicalDestination(destination, absoluteDestination));
 
     // Combine allowed MIME types based on fileTypes array
     let allowedMimeTypes: string[] = [];
@@ -341,14 +388,14 @@ const configureMulter = ({
  */
 export function uploadSingle(options: UploadSingleOptions = {}): (req: Request, res: Response, next: NextFunction) => void {
   try {
-    const destination = options.destination || 'uploads';
+    const storageDestination = getPhysicalDestination(options.destination, options.absoluteDestination);
     const multerInstance = configureMulter(options);
     const middleware = multerInstance.single(options.filename || "file");
     
     return (req: Request, res: Response, next: NextFunction) => {
       // Make sure the destination directory exists
       try {
-        mkdirSync(destination, { recursive: true });
+        mkdirSync(storageDestination, { recursive: true });
       } catch (error) {
         // Directory might already exist, ignore error
       }
@@ -379,6 +426,8 @@ export function uploadSingle(options: UploadSingleOptions = {}): (req: Request, 
           req.fileValidationError = errorMessage;
           return next(multermateError);
         }
+
+        sanitizeStoredPathsForDb(req, options.destination, options.absoluteDestination);
         next();
       });
     };
@@ -395,7 +444,7 @@ export function uploadSingle(options: UploadSingleOptions = {}): (req: Request, 
  */
 export function uploadMultiple(options: UploadMultipleOptions): (req: Request, res: Response, next: NextFunction) => void {
   try {
-    const destination = options.destination || 'uploads';
+    const storageDestination = getPhysicalDestination(options.destination, options.absoluteDestination);
     
     // Map fields configuration to multer format
     const fieldConfigs = options.fields.map(field => ({
@@ -422,7 +471,8 @@ export function uploadMultiple(options: UploadMultipleOptions): (req: Request, r
     }
 
     const multerConfig = {
-      destination,
+      destination: options.destination,
+      absoluteDestination: options.absoluteDestination,
       fileTypes: [],
       customMimeTypes: allowedFileTypes.length > 0 ? allowedFileTypes : [],
       fileSizeLimit: options.fileSizeLimit,
@@ -435,7 +485,7 @@ export function uploadMultiple(options: UploadMultipleOptions): (req: Request, r
     return (req: Request, res: Response, next: NextFunction) => {
       // Make sure the destination directory exists
       try {
-        mkdirSync(destination, { recursive: true });
+        mkdirSync(storageDestination, { recursive: true });
       } catch (error) {
         // Directory might already exist, ignore error
       }
@@ -469,6 +519,8 @@ export function uploadMultiple(options: UploadMultipleOptions): (req: Request, r
           req.fileValidationError = errorMessage;
           return next(multermateError);
         }
+
+        sanitizeStoredPathsForDb(req, options.destination, options.absoluteDestination);
         next();
       });
     };

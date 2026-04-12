@@ -115,6 +115,8 @@ app.post(
   "/upload/advanced",
   uploadSingle({
     destination: "uploads/images",
+    // Files are physically saved here, but req.file.path stays clean for DB
+    absoluteDestination: "C:/data/my-app/uploads/images",
     filename: "profile",
     fileTypes: ["images"],
     fileSizeLimit: 5 * 1024 * 1024, // 5MB
@@ -150,6 +152,7 @@ app.post(
       },
     ],
     destination: "uploads/mixed",
+    absoluteDestination: "C:/data/my-app/uploads/mixed",
     fileSizeLimit: 10 * 1024 * 1024, // 10MB per file
   }),
   (req, res) => {
@@ -295,26 +298,51 @@ app.delete("/files/:filename", async (req, res) => {
 
 Configures single file upload with the following options:
 
-| Option          | Type     | Default   | Description                                |
-| --------------- | -------- | --------- | ------------------------------------------ |
-| destination     | string   | 'uploads' | Upload directory path                      |
-| filename        | string   | 'file'    | Form field name                            |
-| fileTypes       | string[] | []        | Allowed file type categories (empty = all) |
-| customMimeTypes | string[] | []        | Custom MIME types                          |
-| fileSizeLimit   | number   | 50MB      | Max file size in bytes                     |
-| preservePath    | boolean  | false     | Preserve original path                     |
+| Option              | Type     | Default   | Description                                                                                      |
+| ------------------- | -------- | --------- | ------------------------------------------------------------------------------------------------ |
+| destination         | string   | 'uploads' | Upload directory path                                                                            |
+| filename            | string   | 'file'    | Form field name                                                                                  |
+| fileTypes           | string[] | []        | Allowed file type categories (empty = all)                                                       |
+| customMimeTypes     | string[] | []        | Custom MIME types                                                                                |
+| fileSizeLimit       | number   | 50MB      | Max file size in bytes                                                                           |
+| preservePath        | boolean  | false     | Preserve original path                                                                           |
+
+`absoluteDestination` (optional): Physical absolute directory for file storage. When provided, MulterMate keeps `req.file.path` relative so it is safer to store in DB.
 
 ### uploadMultiple(options)
 
 Configures multiple file uploads with the following options:
 
-| Option          | Type     | Default   | Description          |
-| --------------- | -------- | --------- | -------------------- |
-| fields          | Field[]  | []        | Field configurations |
-| destination     | string   | 'uploads' | Upload directory     |
-| customMimeTypes | string[] | []        | Custom MIME types    |
-| fileSizeLimit   | number   | 50MB      | Max file size        |
-| preservePath    | boolean  | false     | Preserve paths       |
+| Option              | Type     | Default   | Description                                                                               |
+| ------------------- | -------- | --------- | ----------------------------------------------------------------------------------------- |
+| fields              | Field[]  | []        | Field configurations                                                                      |
+| destination         | string   | 'uploads' | Upload directory                                                                          |
+| customMimeTypes     | string[] | []        | Custom MIME types                                                                         |
+| fileSizeLimit       | number   | 50MB      | Max file size                                                                             |
+| preservePath        | boolean  | false     | Preserve paths                                                                            |
+
+`absoluteDestination` (optional): Physical absolute directory for file storage. When provided, MulterMate keeps file paths in `req.files` relative for DB storage.
+
+### Absolute Storage with Clean DB Path
+
+Use `absoluteDestination` when files must be stored outside your app folder while keeping DB paths clean:
+
+```javascript
+app.post(
+  "/upload/absolute",
+  uploadSingle({
+    destination: "uploads/images", // This is what goes to req.file.path
+    absoluteDestination: "D:/cdn-storage/project/images", // Physical storage directory
+    fileTypes: ["images"],
+  }),
+  (req, res) => {
+    // Example:
+    // req.file.path => "uploads/images/<generated-file-name>.jpg"
+    // Physical file => "D:/cdn-storage/project/images/<generated-file-name>.jpg"
+    res.json({ file: req.file });
+  }
+);
+```
 
 #### Field Configuration
 
@@ -493,4 +521,4 @@ Wasim Zaman
 
 ## Support
 
-For support, please open an issue in the GitHub repository: https://github.com/Wasim-Zaman/multermate
+For support, please open an issue in the GitHub repository: <https://github.com/Wasim-Zaman/multermate>

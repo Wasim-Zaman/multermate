@@ -60,6 +60,7 @@
     "@types/uuid": "^9.0.7",
     "express": "^5.1.0",
     "rimraf": "^5.0.5",
+    "tsc": "^2.0.4",
     "typescript": "^5.3.3"
   },
   "repository": {
