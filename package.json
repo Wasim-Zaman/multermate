@@ -1,6 +1,6 @@
 {
   "name": "multermate",
-  "version": "2.1.1",
+  "version": "2.2.1",
   "description": "A powerful and flexible file upload utility built on top of Multer with TypeScript support, comprehensive file type handling, custom error classes, and universal JavaScript module compatibility",
   "main": "index.js",
   "module": "index.mjs",
@@ -26,7 +26,7 @@
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types && npm run build:entries",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs --target ES2018",
-    "build:esm": "tsc --module ES2020 --outDir dist/esm --target ES2020 && echo '{\"type\": \"module\"}' > dist/esm/package.json",
+    "build:esm": "tsc --module ES2020 --outDir dist/esm --target ES2020 && node -e \"require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({ type: 'module' }, null, 2))\"",
     "build:types": "tsc --emitDeclarationOnly --outDir types",
     "build:entries": "node -e \"console.log('Build entries completed')\"",
     "clean": "node -e \"const fs=require('fs'); ['dist', 'types'].forEach(dir => { try { fs.rmSync(dir, {recursive: true, force: true}); } catch(e){} })\"",
@@ -60,8 +60,7 @@
     "@types/uuid": "^9.0.7",
     "express": "^5.1.0",
     "rimraf": "^5.0.5",
-    "tsc": "^2.0.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3"
   },
   "repository": {
     "type": "git",
