@@ -1,9 +1,36 @@
 {
   "name": "multermate",
-  "version": "1.0.5",
-  "description": "A flexible and customizable npm package for configuring Multer",
+  "version": "2.1.1",
+  "description": "A powerful and flexible file upload utility built on top of Multer with TypeScript support, comprehensive file type handling, custom error classes, and universal JavaScript module compatibility",
   "main": "index.js",
+  "module": "index.mjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "types/",
+    "index.js",
+    "index.mjs",
+    "index.d.ts",
+    "LICENSE",
+    "readme.md"
+  ],
   "scripts": {
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types && npm run build:entries",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs --target ES2018",
+    "build:esm": "tsc --module ES2020 --outDir dist/esm --target ES2020 && echo '{\"type\": \"module\"}' > dist/esm/package.json",
+    "build:types": "tsc --emitDeclarationOnly --outDir types",
+    "build:entries": "node -e \"console.log('Build entries completed')\"",
+    "clean": "node -e \"const fs=require('fs'); ['dist', 'types'].forEach(dir => { try { fs.rmSync(dir, {recursive: true, force: true}); } catch(e){} })\"",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -11,13 +38,30 @@
     "file upload",
     "middleware",
     "node.js",
-    "configurable"
+    "typescript",
+    "express",
+    "file handling",
+    "form data",
+    "multipart",
+    "configurable",
+    "file validation",
+    "error handling"
   ],
   "author": "Wasim Zaman",
   "license": "MIT",
   "dependencies": {
     "multer": "1.4.5-lts.1",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.10.5",
+    "@types/uuid": "^9.0.7",
+    "express": "^5.1.0",
+    "rimraf": "^5.0.5",
+    "tsc": "^2.0.4",
+    "typescript": "^5.3.3"
   },
   "repository": {
     "type": "git",
